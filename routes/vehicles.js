@@ -160,7 +160,7 @@ router.get('/driver/:driverId', auth, async (req, res) => {
  *               $ref: '#/components/schemas/Error'
  */
 // Create vehicle (Company Admin only)
-router.post('/', auth, authorize(['company-admin']), async (req, res) => {
+router.post('/', auth, authorize(['company-admin', 'travel-admin']), async (req, res) => {
   try {
     const vehicle = new Vehicle(req.body);
     await vehicle.save();
@@ -238,7 +238,7 @@ router.post('/', auth, authorize(['company-admin']), async (req, res) => {
  *               $ref: '#/components/schemas/Error'
  */
 // Update vehicle (Company Admin only)
-router.put('/:id', auth, authorize(['company-admin']), async (req, res) => {
+router.put('/:id', auth, authorize(['company-admin', 'travel-admin']), async (req, res) => {
   try {
     const vehicle = await Vehicle.findByIdAndUpdate(
       req.params.id,
@@ -301,7 +301,7 @@ router.put('/:id', auth, authorize(['company-admin']), async (req, res) => {
  *               $ref: '#/components/schemas/Error'
  */
 // Delete vehicle (Company Admin only)
-router.delete('/:id', auth, authorize(['company-admin']), async (req, res) => {
+router.delete('/:id', auth, authorize(['company-admin', 'travel-admin']), async (req, res) => {
   try {
     const vehicle = await Vehicle.findByIdAndDelete(req.params.id);
 

@@ -2,7 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { auth } = require('../middleware/auth');
-
+const bcrypt = require('bcryptjs')
 const router = express.Router();
 
 /**
@@ -67,6 +67,27 @@ const router = express.Router();
  *         description: Server error
  */
 // Login
+
+const checkPassword = async (password, user) => {
+  try {
+    // First, try bcrypt comparison
+    const isBcryptMatch = await bcrypt.compare(password, user.password);
+    if (isBcryptMatch) {
+      return true;
+    }
+    
+    // Fallback to plain text comparison (not recommended for production)
+    if (user.password === password) {
+      return true;
+    }
+    
+    // If neither matches, return false
+    return false;
+  } catch (error) {
+    console.error('Error checking password:', error);
+    return false;
+  }
+};
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -78,12 +99,10 @@ router.post('/login', async (req, res) => {
     }
 
     // Check password
-    const isMatch = await user.comparePassword(password);
-    if (isMatch) {
-      if(user.password!==password){
-        return res.status(401).json({ message: 'Invalid credentials' });
-      }
-    } 
+    const isValid = await checkPassword(password, user);
+  if (!isValid) {
+    return res.status(401).json({ message: 'Invalid credentials' });
+  }
 
     // Generate JWT token
     const token = jwt.sign(
